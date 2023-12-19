@@ -5,6 +5,8 @@ import math
 
 pygame.init()
 
+mixer.init()
+
 screen = pygame.display.set_mode((800, 600))
 # screen.fill((150, 150, 150))
 pygame.display.set_caption('ex05/Invaders Game')
@@ -28,7 +30,9 @@ bullet_state = 'ready'
 
 # Score
 score_value = 0
-
+#クリア条件
+font_1 = pygame.font.SysFont(None, 32) # フォントの作成
+clear_font = pygame.font.SysFont(None, 64) # **ゲームクリアメッセージ用のフォントを作成**
 
 
 def player(x, y):
@@ -51,7 +55,7 @@ def isCollision(enemyX, enemyY, bulletX, bulletY):
     
 # gaugeの値設定
 gauge_value = 0
-gauge_max = 3
+gauge_max = 5
 
 """
 gaugeの描画設定
@@ -81,6 +85,14 @@ while running:
                 if bullet_state is 'ready':
                     bulletX = playerX
                     fire_bullet(bulletX, bulletY)
+
+            #capslockを押すとゲージが一増える
+            if event.key == pygame.K_CAPSLOCK and gauge_value >= 2:
+                gauge_value  -= 2
+                gauge_max += 1
+                if gauge_max >= 15:
+                    gauge_max -=1
+                    gauge_value += 2
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
@@ -131,7 +143,33 @@ while running:
     font = pygame.font.SysFont(None, 32) # フォントの作成　Noneはデフォルトのfreesansbold.ttf
     score = font.render(f"Score : {str(score_value)}", True, (255,255,255)) # テキストを描画したSurfaceの作成
     screen.blit(score, (20,50))
-  
+
+    # ゲームクリア
+    """
+    if score_value >= 3:
+        clear_text = clear_font.render("congratulations...", True, (255,255,255)) # **クリアメッセージを作成**
+        screen.blit(clear_text, (200,250)) # 画面中央に表示
+        pygame.display.update()
+        pygame.time.wait(5000) # 5秒間待つ
+        break
+"""
+    # ゲームクリア
+    if score_value >= 10:
+        clear_text_1 = clear_font.render("congratulations...", True, (255,255,0)) # クリアメッセージを作成
+
+        text_height = clear_text_1.get_height()
+        start_y = 600  # テキストが画面下から始まるように設定
+        speed = 8  # テキストが移動する速度
+
+        while start_y + text_height > 0:  # テキストが画面上に完全に消えるまでループ
+            screen.fill((0, 0, 0))  # 画面を黒で塗りつぶす
+            screen.blit(clear_text_1, (200, start_y))  # テキストを新しい位置に描画
+            pygame.display.update()  # 画面を更新
+            start_y -= speed  # テキストのy座標を減らす（上に移動）
+            pygame.time.wait(20)  # 一定時間待つ（テキストの移動速度を制御）
+
+        
+        break
 
     # guageの描画
     gauge()
