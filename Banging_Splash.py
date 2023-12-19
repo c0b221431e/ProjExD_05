@@ -25,6 +25,7 @@ bulletImg = pygame.image.load('bullet.png')
 bulletX, bulletY = 0, 480
 bulletX_change, bulletY_change = 0, 3
 bullet_state = 'ready'
+multishot = False  # 散弾が放たれている状態か否か
 
 # Score
 score_value = 0
@@ -38,8 +39,9 @@ def enemy(x, y):
     screen.blit(enemyImg, (x, y))
 
 def fire_bullet(x, y):
+    global bullet_state
     screen.blit(bulletImg, (x + 16, y + 10)) 
-    # bullet_state = 'fire' は下の方で行ってます
+    bullet_state = 'fire'
 
 def isCollision(enemyX, enemyY, bulletX, bulletY):
     distance = math.sqrt(math.pow(enemyX - bulletX, 2) + math.pow(enemyY - bulletY, 2))
@@ -53,33 +55,59 @@ class Multishot:
     """
     特殊技「散弾」のクラス
     """
-    def __init__(self, power: int):
+    def __init__(self, playerX, playerY, power: int):
         """
         引数
-        playerX, playerY:自機のX座標、Y座標
+        playerX, playerY:自機のX座標とY座標
         power:ゲージの溜まり具合、散弾で出る弾の数
         """
-        global bullet_state 
+        self.playerX, self.playerY = playerX, playerY
         self.power = power
-        bullet_state = 'multi'  # bullet_stateに新たな状態'multi'を追加することで散弾を表現
+        self.image = pygame.image.load('bullet.png')
+        self.bullets_locate = [[self.playerX, self.playerY]] * power  # 弾の現在地のリスト
+        self.bullet_speed = bulletY_change  # 弾の進むスピード
+        self.is_arrive = [False] * power  # 弾が存在するか否かのリスト
 
-    def shoot_ms(self):
+    def summon_bullets(self):
+        """
+        散弾を生成するための関数
+        """
+        self.lst = []  # 角度の違う弾丸のリスト
+        self.angles = []  # 角度のリスト
+        cnt = 0
+        for i in range(-40, 41, 80//(self.power-1)):
+            self.lst.append(pygame.transform.rotozoom(self.image, i, 1.0))
+            self.angles.append(i)
+            self.is_arrive[cnt] = True
+            cnt += 1
+        
+    def move_bullets(self):
         """
         散弾を動かすための関数
         """
-        global bulletY
-        for i in range(40, 761, 720//(self.power-1)):  # 全ての散弾に対して
-            fire_bullet(i-10, bulletY)
-            collision = isCollision(enemyX, enemyY, i-10, bulletY)
-            if collision:
-                bulletY = 480
-                bullet_state = 'ready'
+        for n, img in enumerate(self.lst):  # 存在するすべての弾に対して
+            if self.is_arrive[n]:
+                locx, locy = self.bullets_locate[n]
+                screen.blit(img, (self.bullets_locate[n]))  # 弾の描画
+                locx += math.cos(math.radians(self.angles[n]+90)) *self.bullet_speed  # 弾の移動
+                locy -= math.sin(math.radians(self.angles[n]+90)) *self.bullet_speed
+                self.bullets_locate[n] = [locx, locy]
+
+    def kill_bullets(self):
+        """
+        散弾を消去するための関数
+        """
+        global enemyX, enemyY, score_value
+        for n, b in enumerate(self.bullets_locate):  # 全ての弾に対して
+            collision = isCollision(enemyX, enemyY, b[0], b[1])
+            if collision:  # 敵と衝突したなら、スコアを+1して、弾と敵をリセットする
                 score_value += 1
                 enemyX = random.randint(0, 736)
                 enemyY = random.randint(50, 150)
-        bulletY -= bulletY_change
-        
-        
+                self.is_arrive[n] = False
+            if b[1] < 0:  # 画面外に出たら弾消失
+                self.is_arrive[n] = False
+                
 
 running = True
 while running:
@@ -98,9 +126,11 @@ while running:
                 if bullet_state is 'ready':
                     bulletX = playerX
                     fire_bullet(bulletX, bulletY)
-                    bullet_state = 'fire'  # 散弾においてbullet_stateを利用するにあたり、fireへの移行をこっちで行うようにしました
+                    # bullet_state = 'fire'  # 散弾においてbullet_stateを利用するにあたり、fireへの移行をこっちで行うようにしました
             if event.key == pygame.K_RSHIFT:  # RSHIFTが押されたなら
-                mshot = Multishot(gage)
+                mshot = Multishot(playerX, playerY, gage)  # Multishotインスタンス生成
+                mshot.summon_bullets()
+                multishot = True  # 散弾状態へ移行
                 gage = 0  # ゲージをすべて消費
 
         if event.type == pygame.KEYUP:
@@ -125,8 +155,6 @@ while running:
         enemyY += enemyY_change
 
     collision = isCollision(enemyX, enemyY, bulletX, bulletY)
-    if bullet_state is 'multi':  # 散弾が放たれていたら
-        mshot.shoot_ms()
     if collision:
         bulletY = 480
         bullet_state = 'ready'
@@ -143,7 +171,12 @@ while running:
         fire_bullet(bulletX, bulletY)
         bulletY -= bulletY_change  
     
-    
+    # Multishot
+    if multishot:  # 散弾についての処理
+        mshot.move_bullets()
+        mshot.kill_bullets()
+        if True not in mshot.is_arrive:  # 存在する弾がなくなったら、multishot状態から抜ける
+            multishot = False
 
     # Score
     font = pygame.font.SysFont(None, 32) # フォントの作成　Noneはデフォルトのfreesansbold.ttf
