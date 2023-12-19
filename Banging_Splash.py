@@ -49,10 +49,17 @@ def isCollision(enemyX, enemyY, bulletX, bulletY):
     else:
         return False
     
-#gaugeの値設定
+# gaugeの値設定
 gauge_value = 0
 gauge_max = 3
-#gaugeの描画設定
+
+"""
+gaugeの描画設定
+ゲージの増加を表すゲージを緑に設定
+ゲージが満たされていない事を表す色を赤に設定
+スコアの下あたり表示させる
+"""
+
 def gauge():
     pygame.draw.rect(screen, (255, 0, 0), [20, 80, gauge_max * 20, 20])  #　赤のゲージ
     pygame.draw.rect(screen, (0, 255, 0), [20, 80, gauge_value * 20, 20])  # 緑のゲージ
@@ -101,10 +108,12 @@ while running:
         bulletY = 480
         bullet_state = 'ready'
         score_value += 1
+        # ゲージの描画を、当たり判定でする。
         if gauge_value<gauge_max:
             gauge_value += 1 # ゲージの値を1増加する。
         if gauge_value >= gauge_max:
             gauge_value=gauge_max
+
         enemyX = random.randint(0, 736)
         enemyY = random.randint(50, 150)
 
