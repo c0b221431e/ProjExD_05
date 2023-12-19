@@ -93,6 +93,12 @@ while running:
                 if gauge_max >= 15:
                     gauge_max -=1
                     gauge_value += 2
+            #なくてもいい        
+            elif event.key == pygame.K_CAPSLOCK and gauge_value < 2:
+                event_text = clear_font.render("It's not the time yet...", True, (255,255,0)) # クリアメッセージを作成
+                screen.blit(event_text, (200,250)) # 画面中央に表示
+                pygame.display.update()
+                pygame.time.wait(500) # 5秒間待つ
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
@@ -120,6 +126,7 @@ while running:
         bulletY = 480
         bullet_state = 'ready'
         score_value += 1
+
         # ゲージの描画を、当たり判定でする。
         if gauge_value<gauge_max:
             gauge_value += 1 # ゲージの値を1増加する。
@@ -147,14 +154,14 @@ while running:
     # ゲームクリア
     """
     if score_value >= 3:
-        clear_text = clear_font.render("congratulations...", True, (255,255,255)) # **クリアメッセージを作成**
+        clear_text = clear_font.render("congratulations!", True, (255,255,255)) # **クリアメッセージを作成**
         screen.blit(clear_text, (200,250)) # 画面中央に表示
         pygame.display.update()
         pygame.time.wait(5000) # 5秒間待つ
         break
 """
     # ゲームクリア
-    if score_value >= 10:
+    if score_value >= 30:
         clear_text_1 = clear_font.render("congratulations...", True, (255,255,0)) # クリアメッセージを作成
 
         text_height = clear_text_1.get_height()
