@@ -30,7 +30,7 @@ multishot = False  # 散弾が放たれている状態か否か
 # Score
 score_value = 0
 
-gage = 5  # ゲージの溜まり具合
+gage = 10  # ゲージの溜まり具合 ※conflict時、この変数(以下のプログラムで使われているものを含む)は、ゲージ担当のものに合わせてください
 
 def player(x, y):
     screen.blit(playerImg, (x, y))
@@ -75,11 +75,16 @@ class Multishot:
         self.lst = []  # 角度の違う弾丸のリスト
         self.angles = []  # 角度のリスト
         cnt = 0
-        for i in range(-40, 41, 80//(self.power-1)):
-            self.lst.append(pygame.transform.rotozoom(self.image, i, 1.0))
-            self.angles.append(i)
+        try:
+            for i in range(-400, 410, 800//(self.power-1)):  # ゲージが2以上の場合、散弾発動
+                self.lst.append(pygame.transform.rotozoom(self.image, i/10, 1.0))
+                self.angles.append(i/10)
+                self.is_arrive[cnt] = True
+                cnt += 1
+        except ZeroDivisionError:  # ゲージが1の場合、正面に飛ぶようにする
+            self.lst.append(pygame.transform.rotozoom(self.image, 0, 1.0))
+            self.angles.append(0)
             self.is_arrive[cnt] = True
-            cnt += 1
         
     def move_bullets(self):
         """
@@ -126,8 +131,7 @@ while running:
                 if bullet_state is 'ready':
                     bulletX = playerX
                     fire_bullet(bulletX, bulletY)
-                    # bullet_state = 'fire'  # 散弾においてbullet_stateを利用するにあたり、fireへの移行をこっちで行うようにしました
-            if event.key == pygame.K_RSHIFT:  # RSHIFTが押されたなら
+            if event.key == pygame.K_RSHIFT and gage >= 1:  # ゲージが1以上溜まっている時にRSHIFTが押されたなら
                 mshot = Multishot(playerX, playerY, gage)  # Multishotインスタンス生成
                 mshot.summon_bullets()
                 multishot = True  # 散弾状態へ移行
