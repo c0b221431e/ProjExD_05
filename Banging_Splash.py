@@ -18,7 +18,7 @@ playerX_change = 0
 enemyImg = pygame.image.load('ex05/enemy.png')
 enemyX = random.randint(0, 736)
 enemyY = random.randint(50, 150)
-enemyX_change = random.randint(3, 6)  # 速度ランダム
+enemyX_change = random.randint(1, 7)  # 速度ランダム
 enemyY_change = 0  # 横方向にのみ移動
 
 # Bullet
@@ -81,9 +81,9 @@ while running:
         break
     enemyX += enemyX_change
     if enemyX <= 0: #左端に来たら
-        enemyX_change = random.randint(3, 6)  # 速度ランダム
+        enemyX_change = random.randint(1, 7)  # 速度ランダム
     elif enemyX >=736: #右端に来たら
-        enemyX_change = random.randint(-6, -3)  # 速度ランダム
+        enemyX_change = random.randint(-7, -1)  # 速度ランダム
 
     collision = isCollision(enemyX, enemyY, bulletX, bulletY)
     if collision:
