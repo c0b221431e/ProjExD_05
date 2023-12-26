@@ -5,8 +5,10 @@ import math
 
 pygame.init()
 
+# 背景の定義
+background = pygame.image.load('background.png')
+
 screen = pygame.display.set_mode((800, 600))
-# screen.fill((150, 150, 150))
 pygame.display.set_caption('Invaders Game')
 
 # Player
@@ -20,10 +22,16 @@ enemyX = random.randint(0, 736)
 enemyY = random.randint(50, 150)
 enemyX_change, enemyY_change = 4, 40
 
+# Enemy Bullet
+enemy_bulletImg = pygame.image.load('enemy_bullet.png')
+enemy_bulletX, enemy_bulletY = 0, 0
+enemy_bulletX_change, enemy_bulletY_change = 0, 5
+enemy_bullet_state = 'ready'
+
 # Bullet
 bulletImg = pygame.image.load('ex05/bullet.png')
 bulletX, bulletY = 0, 480
-bulletX_change, bulletY_change = 0, 3
+bulletX_change, bulletY_change = 0, 10
 bullet_state = 'ready'
 
 #ここ
@@ -35,11 +43,14 @@ shield_state = 'ready'
 # Score
 score_value = 0
 
+
 def player(x, y):
     screen.blit(playerImg, (x, y))
 
+
 def enemy(x, y):
     screen.blit(enemyImg, (x, y))
+
 
 def fire_bullet(x, y):
     global bullet_state
@@ -53,23 +64,44 @@ def draw_shield(x, y):
 def isCollision(obj1X, obj1Y, obj2X, obj2Y, obj1_radius, obj2_radius):
     distance = math.sqrt(math.pow(obj1X - obj2X, 2) + math.pow(obj1Y - obj2Y, 2))
     if distance < (obj1_radius + obj2_radius):
+
+
+def fire_enemy_bullet(x, y):
+    global enemy_bullet_state
+    enemy_bullet_state = 'fire'
+    screen.blit(enemy_bulletImg, (x + 16, y + 10))
+
+
+def isCollision(x1, y1, x2, y2):
+    distance = math.sqrt(math.pow(x1 - x2, 2) + math.pow(y1 - y2, 2))
+    if distance < 27:
         return True
     else:
         return False
 
+###当たり判定
+def isPlayerHit(playerX, playerY, enemy_bulletX, enemy_bulletY):
+    distance = math.sqrt(math.pow(playerX - enemy_bulletX, 2) + math.pow(playerY - enemy_bulletY, 2))
+    if distance < 27:
+        return True
+    else:
+        return False
+
+
 running = True
 while running:
     screen.fill((0, 0, 0))
-
+    # 背景を実装
+    screen.blit(background, (0, 0))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-    
+
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
-                playerX_change = -1.5
+                playerX_change = -3.0
             if event.key == pygame.K_RIGHT:
-                playerX_change = 1.5
+                playerX_change = 3.0
             if event.key == pygame.K_SPACE:
                 if bullet_state is 'ready':
                     bulletX = playerX
@@ -83,6 +115,7 @@ while running:
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                 playerX_change = 0
+
     # Player
     playerX += playerX_change
     if playerX <= 0:
@@ -102,9 +135,13 @@ while running:
     enemyX += enemyX_change
     if enemyX <= 0: #左端に来たら
         enemyX_change = 1#4 
+    if enemyX <= 0:  # 左端に来たら
+        enemyX_change = 4
         enemyY += enemyY_change
     elif enemyX >=736: #右端に来たら
         enemyX_change = -1#-4
+    elif enemyX >= 736:  # 右端に来たら
+        enemyX_change = -4
         enemyY += enemyY_change
 
     #ここ
@@ -112,9 +149,21 @@ while running:
         shield_state = 'ready'
         enemyX = random.randint(0, 736)
         enemyY = random.randint(50, 150)
+    # Enemy Bullet Movementの追加
+    if enemy_bullet_state is 'ready':
+        enemy_bulletX = enemyX
+        enemy_bulletY = enemyY
+        enemy_bullet_state = 'fire'
 
-    # Bullet Movement
-    if bulletY <=0:
+    if enemy_bulletY >= 600:
+        enemy_bullet_state = 'ready'
+
+    if enemy_bullet_state is 'fire':
+        fire_enemy_bullet(enemy_bulletX, enemy_bulletY)
+        enemy_bulletY += enemy_bulletY_change
+
+    # Bullet Movementの追加
+    if bulletY <= 0:
         bulletY = 480
         bullet_state = 'ready'
 
@@ -122,10 +171,25 @@ while running:
         fire_bullet(bulletX, bulletY)
         bulletY -= bulletY_change  
 
+    # Check collisions
+    collision_enemy = isCollision(enemyX, enemyY, bulletX, bulletY)
+    if collision_enemy:
+        bulletY = 480
+        bullet_state = 'ready'
+        score_value += 1
+        enemyX = random.randint(0, 736)
+        enemyY = random.randint(50, 150)
+
+    #当たり判定の追加
+    collision_player = isPlayerHit(playerX, playerY, enemy_bulletX, enemy_bulletY)
+    if collision_player:
+        print("Game Over")
+        running = False
+
     # Score
-    font = pygame.font.SysFont(None, 32) # フォントの作成　Noneはデフォルトのfreesansbold.ttf
-    score = font.render(f"Score : {str(score_value)}", True, (255,255,255)) # テキストを描画したSurfaceの作成
-    screen.blit(score, (20,50))
+    font = pygame.font.SysFont(None, 32)  # フォントの作成　Noneはデフォルトのfreesansbold.ttf
+    score = font.render(f"Score : {str(score_value)}", True, (255, 255, 255))  # テキストを描画したSurfaceの作成
+    screen.blit(score, (20, 50))
 
     player(playerX, playerY)
     enemy(enemyX, enemyY)
