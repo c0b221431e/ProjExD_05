@@ -101,10 +101,10 @@ while running:
         break
     enemyX += enemyX_change
     if enemyX <= 0: #左端に来たら
-        enemyX_change = 4 
+        enemyX_change = 1#4 
         enemyY += enemyY_change
     elif enemyX >=736: #右端に来たら
-        enemyX_change = -4
+        enemyX_change = -1#-4
         enemyY += enemyY_change
 
     #ここ
@@ -130,4 +130,4 @@ while running:
     player(playerX, playerY)
     enemy(enemyX, enemyY)
 
-    pygame.display.update()
+    pygame.display.update()  
