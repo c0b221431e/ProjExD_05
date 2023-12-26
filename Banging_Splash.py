@@ -57,7 +57,7 @@ def fire_enemy_bullet(x, y):
     enemy_bullet_state = 'fire'
     screen.blit(enemy_bulletImg, (x + 16, y + 10))
 
-###当たり判定
+
 def isCollision(x1, y1, x2, y2):
     distance = math.sqrt(math.pow(x1 - x2, 2) + math.pow(y1 - y2, 2))
     if distance < 27:
@@ -65,7 +65,7 @@ def isCollision(x1, y1, x2, y2):
     else:
         return False
 
-###
+###当たり判定
 def isPlayerHit(playerX, playerY, enemy_bulletX, enemy_bulletY):
     distance = math.sqrt(math.pow(playerX - enemy_bulletX, 2) + math.pow(playerY - enemy_bulletY, 2))
     if distance < 27:
