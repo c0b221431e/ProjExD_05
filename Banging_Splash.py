@@ -30,7 +30,7 @@ multishot = False  # 散弾が放たれている状態か否か
 # Score
 score_value = 0
 
-gage = 8  # ゲージの溜まり具合 ※conflict時、この変数(以下のプログラムで使われているものを含む)は、ゲージ担当のものに合わせてください
+gage = 5  # ゲージの溜まり具合 ※conflict時、この変数(以下のプログラムで使われているものを含む)は、ゲージ担当のものに合わせてください
 
 def player(x, y):
     screen.blit(playerImg, (x, y))
@@ -64,7 +64,7 @@ class Multishot:
         self.playerX, self.playerY = playerX, playerY
         self.power = power
         self.image = pygame.image.load('bullet.png')
-        self.bullets_locate = [[self.playerX, self.playerY]] * power  # 弾の現在地のリスト
+        self.bullets_locate = [[self.playerX, self.playerY]]*power   # 弾の現在地のリスト
         self.bullet_speed = bulletY_change  # 弾の進むスピード
         self.is_arrive = [False] * power  # 弾が存在するか否かのリスト
 
@@ -134,7 +134,7 @@ while running:
                 if bullet_state is 'ready':
                     bulletX = playerX
                     fire_bullet(bulletX, bulletY)
-            if event.key == pygame.K_RSHIFT and gage >= 1:  # ゲージが1以上溜まっている時にRSHIFTが押されたなら
+            if event.key == pygame.K_RSHIFT and gage >= 1 and not multishot:  # ゲージが1以上溜まっている時にRSHIFTが押されたなら
                 mshot = Multishot(playerX, playerY, gage)  # Multishotインスタンス生成
                 mshot.summon_bullets()
                 multishot = True  # 散弾状態へ移行
