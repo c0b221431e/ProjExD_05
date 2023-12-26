@@ -30,7 +30,7 @@ multishot = False  # 散弾が放たれている状態か否か
 # Score
 score_value = 0
 
-gage = 10  # ゲージの溜まり具合 ※conflict時、この変数(以下のプログラムで使われているものを含む)は、ゲージ担当のものに合わせてください
+gage = 8  # ゲージの溜まり具合 ※conflict時、この変数(以下のプログラムで使われているものを含む)は、ゲージ担当のものに合わせてください
 
 def player(x, y):
     screen.blit(playerImg, (x, y))
@@ -103,13 +103,16 @@ class Multishot:
         散弾を消去するための関数
         """
         global enemyX, enemyY, score_value
+        enemy = "arrive"  # 敵が生存しているか否か(複数弾同時ヒットを避けるため)
         for n, b in enumerate(self.bullets_locate):  # 全ての弾に対して
-            collision = isCollision(enemyX, enemyY, b[0], b[1])
-            if collision:  # 敵と衝突したなら、スコアを+1して、弾と敵をリセットする
-                score_value += 1
-                enemyX = random.randint(0, 736)
-                enemyY = random.randint(50, 150)
-                self.is_arrive[n] = False
+            if enemy == "arrive":  # 敵が生存しているなら
+                collision = isCollision(enemyX, enemyY, b[0], b[1])
+                if collision:  # 敵と衝突したなら、スコアを+1して、弾と敵をリセットする
+                    score_value += 1
+                    enemyX = random.randint(0, 736)
+                    enemyY = random.randint(50, 150)
+                    self.is_arrive[n] = False
+                    enemy = "dead"  # 敵を生存していない状態にする
             if b[1] < 0:  # 画面外に出たら弾消失
                 self.is_arrive[n] = False
                 
