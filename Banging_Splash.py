@@ -34,6 +34,12 @@ score_value = 0
 font_1 = pygame.font.SysFont(None, 32) # フォントの作成
 clear_font = pygame.font.SysFont(None, 64) # **ゲームクリアメッセージ用のフォントを作成**
 
+def sound_beam():
+    pygame.mixer.init() #初期化
+    pygame.mixer.music.load("laser.wav") #読み込み
+    pygame.mixer.music.play(1) #再生
+
+    
 
 def player(x, y):
     screen.blit(playerImg, (x, y))
@@ -56,6 +62,8 @@ def isCollision(enemyX, enemyY, bulletX, bulletY):
 # gaugeの値設定
 gauge_value = 0
 gauge_max = 5
+font_gauge = pygame.font.Font(None, 40)
+font_gauge_power = pygame.font.Font(None, 30)
 
 """
 gaugeの描画設定
@@ -67,6 +75,8 @@ gaugeの描画設定
 def gauge():
     pygame.draw.rect(screen, (255, 0, 0), [20, 80, gauge_max * 20, 20])  #　赤のゲージ
     pygame.draw.rect(screen, (0, 255, 0), [20, 80, gauge_value * 20, 20])  # 緑のゲージ
+    text_gauge_power = font_gauge_power.render("POWER"+str(gauge_value), True, (0,255,0))   # 描画する文字列の設定
+    screen.blit(text_gauge_power, [20, 130])# 文字列の表示位置
 
 running = True
 while running:
@@ -85,6 +95,7 @@ while running:
                 if bullet_state is 'ready':
                     bulletX = playerX
                     fire_bullet(bulletX, bulletY)
+                    sound_beam()
 
             #capslockを押すとゲージが一増える
             if event.key == pygame.K_CAPSLOCK and gauge_value >= 2:
@@ -103,6 +114,7 @@ while running:
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                 playerX_change = 0
+
     # Player
     playerX += playerX_change
     if playerX <= 0:
@@ -116,10 +128,10 @@ while running:
     enemyX += enemyX_change
     if enemyX <= 0: #左端に来たら
         enemyX_change = 1#4
-        enemyY += enemyY_change
+        #enemyY += enemyY_change
     elif enemyX >=736: #右端に来たら
         enemyX_change = -1#-4
-        enemyY += enemyY_change
+        #enemyY += enemyY_change
 
     collision = isCollision(enemyX, enemyY, bulletX, bulletY)
     if collision:
@@ -132,10 +144,15 @@ while running:
             gauge_value += 1 # ゲージの値を1増加する。
         if gauge_value >= gauge_max:
             gauge_value=gauge_max
-
+        
         enemyX = random.randint(0, 736)
         enemyY = random.randint(50, 150)
 
+    #ゲージの最大値を文字として表示
+    if gauge_max == 15:
+            text_gauge = font_gauge.render("GAUGE MAX", True, (255,0,0))   # 描画する文字列の設定
+            screen.blit(text_gauge, [20, 150])# 文字列の表示位置
+           
 
     # Bullet Movement
     if bulletY <=0:
@@ -161,7 +178,7 @@ while running:
         break
 """
     # ゲームクリア
-    if score_value >= 30:
+    if score_value >= 3:
         clear_text_1 = clear_font.render("congratulations...", True, (255,255,0)) # クリアメッセージを作成
 
         text_height = clear_text_1.get_height()
