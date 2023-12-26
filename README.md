@@ -1,8 +1,8 @@
 
-# Banging_Splash
+
 
 # ゲーム のタイトル
-Banging Splash
+# Banging_Splash
 
 
 ## 実行環境の必要条件
